@@ -1,4 +1,4 @@
-# Node JS API Boilerplate
+# Matrix Integration Demo
 
-Tech: Node JS, Typescript, Express, Decorators
+Simple exploratory project to look at how to integrate a Synapse (Matrix) server as the backing chat platform for an application
 
