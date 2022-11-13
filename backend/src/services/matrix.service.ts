@@ -1,5 +1,8 @@
 import { Container, Injectable, InjectionToken } from '@decorators/di';
 import { createClient, ClientEvent, RoomEvent, IContent, EventType } from 'matrix-js-sdk';
+import { logger } from 'matrix-js-sdk/lib/logger';
+
+logger.setLevel('silent');
 
 @Injectable()
 export class MatrixService {
@@ -12,15 +15,16 @@ export class MatrixService {
         this.client.startClient();
 
         this.client.once(ClientEvent.Sync, (state, prevState, res) => {
-          console.log(state); // state will be 'PREPARED' when the client is ready to use
+          // console.log(state); // state will be 'PREPARED' when the client is ready to use
         });;
 
         this.client.on(RoomEvent.Timeline, function(event, room, toStartOfTimeline) {
-          console.log('======================');
-          console.log('RoomEvent Timeline:')
-          console.dir(event.event);
+          // Uncomment these to see the room events
+          // console.log('======================');
+          // console.log('RoomEvent Timeline:')
+          // console.dir(event.event);
 
-          console.log('======================');
+          // console.log('======================');
       });
       }); 
   }

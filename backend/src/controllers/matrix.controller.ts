@@ -19,9 +19,14 @@ export class MatrixController {
 
   @Get('/rooms')
   getRooms(@Response() res: express.Response) {
+    const rooms = this.matrixService.rooms;
 
-
-    res.json({ rooms: this.matrixService.rooms })
+    res.json({ rooms: rooms.map(r => ({
+      id: r.roomId,
+      summary: r.summary,
+      memberCount: r.getJoinedMemberCount(),
+      timeline: r.timeline
+    }))});
   }
 
   @Post('/rooms')
