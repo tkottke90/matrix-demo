@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+
+  synapse:
+    image: matrixdotorg/synapse
+    volumes:
+      - ./config:/data
+    ports:
+      - 8008:8008
