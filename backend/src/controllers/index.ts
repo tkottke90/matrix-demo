@@ -5,8 +5,9 @@
 
 import { attachControllers } from '@decorators/express';
 import { Application } from 'express';
+import { MatrixController } from './matrix.controller';
 import { ServerStatusController } from './server-status';
 
 export default function (app: Application) {
-  attachControllers(app, [ServerStatusController]);
+  attachControllers(app, [ServerStatusController, MatrixController]);
 }
