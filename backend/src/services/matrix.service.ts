@@ -1,5 +1,5 @@
 import { Container, Injectable, InjectionToken } from '@decorators/di';
-import { createClient, ClientEvent, RoomEvent, IContent, EventType } from 'matrix-js-sdk';
+import { createClient, ClientEvent, RoomEvent, IContent } from 'matrix-js-sdk';
 import { logger } from 'matrix-js-sdk/lib/logger';
 
 logger.setLevel('silent');
@@ -10,28 +10,31 @@ export class MatrixService {
 
   constructor() {
     this.client = createClient({ baseUrl: 'http://localhost:8008' });
-    this.login()
-      .then(() => {
-        this.client.startClient();
+    this.login().then(() => {
+      this.client.startClient();
 
-        this.client.once(ClientEvent.Sync, (state, prevState, res) => {
-          // console.log(state); // state will be 'PREPARED' when the client is ready to use
-        });;
+      this.client.once(ClientEvent.Sync, (state, prevState, res) => {
+        // console.log(state); // state will be 'PREPARED' when the client is ready to use
+      });
 
-        this.client.on(RoomEvent.Timeline, function(event, room, toStartOfTimeline) {
+      this.client.on(
+        RoomEvent.Timeline,
+        function (event, room, toStartOfTimeline) {
           // Uncomment these to see the room events
           // console.log('======================');
           // console.log('RoomEvent Timeline:')
           // console.dir(event.event);
-
           // console.log('======================');
-      });
-      }); 
+        }
+      );
+    });
   }
 
   private login() {
-    return this.client
-      .login('m.login.password', { user: 'ROOT', password: 'password 1' });
+    return this.client.login('m.login.password', {
+      user: 'ROOT',
+      password: 'password 1'
+    });
   }
 
   get accessToken() {
@@ -42,8 +45,12 @@ export class MatrixService {
     return this.client.getRooms();
   }
 
+  createUser(username: string, password: string) {
+    return this.client.register(username, password, null, { type: 'test' });
+  }
+
   createRoom(roomName: string) {
-    return this.client.createRoom({ name: roomName })
+    return this.client.createRoom({ name: roomName });
   }
 
   sendMessage(roomId: string, message: string) {
@@ -67,4 +74,4 @@ export class MatrixService {
 
 Container.provide([
   { provide: new InjectionToken('MatrixService'), useClass: MatrixService }
-])
+]);
