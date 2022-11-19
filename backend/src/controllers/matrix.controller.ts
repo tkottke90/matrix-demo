@@ -77,7 +77,11 @@ export class MatrixController {
   ) {
     try {
       LoggerService.log('info', 'Sending new message', { ...body });
-      await this.matrixService.sendMessage(body.roomId, body.message);
+      await this.matrixService.sendMessage(
+        '@service_user:my.matrix.host',
+        body.roomId,
+        body.message
+      );
 
       res.json({ message: 'Success' });
     } catch (error) {

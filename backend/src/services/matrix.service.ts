@@ -1,14 +1,30 @@
 import { Container, Injectable, InjectionToken } from '@decorators/di';
-import { createClient, ClientEvent, RoomEvent, IContent } from 'matrix-js-sdk';
+import {
+  createClient,
+  ClientEvent,
+  RoomEvent,
+  IContent,
+  MatrixClient
+} from 'matrix-js-sdk';
 import { logger } from 'matrix-js-sdk/lib/logger';
 
 logger.setLevel('silent');
 
+function GetUserCredentials() {
+  return {
+    id: 1,
+    displayName: 'Dungeon Master',
+    matrixLogin: { user: '@dm_user:my.matrix.host', password: 'gameon' }
+  };
+}
+
 @Injectable()
 export class MatrixService {
   private client;
+  private connections: Map<string, MatrixClient> = new Map();
 
   constructor() {
+    // this.connections = new Cache({ stdTTL: 60 * 60 * 12 /* Twelve Hours */ });
     this.client = createClient({ baseUrl: 'http://localhost:8008' });
     this.login().then(() => {
       this.client.startClient();
@@ -32,7 +48,7 @@ export class MatrixService {
 
   private login() {
     return this.client.login('m.login.password', {
-      user: 'ROOT',
+      user: 'service_user2',
       password: 'password 1'
     });
   }
@@ -46,21 +62,46 @@ export class MatrixService {
   }
 
   createUser(username: string, password: string) {
-    return this.client.register(username, password, null, { type: 'test' });
+    return this.client.register(username, password, null, { type: 'email' });
   }
 
   createRoom(roomName: string) {
     return this.client.createRoom({ name: roomName });
   }
 
-  sendMessage(roomId: string, message: string) {
-    return new Promise<void>((resolve, reject) => {
+  async userLogin(userId: string) {
+    // Here we are "getting the users credentials from storage"
+    const user = GetUserCredentials();
+
+    // Create a new client
+    const client = createClient({ baseUrl: 'http://localhost:8008' });
+    await client.login('m.login.password', user.matrixLogin);
+
+    this.connections.set(userId, client);
+
+    return client;
+  }
+
+  async enterRoom(roomId: string, userId: string) {
+    await this.client.invite(roomId, userId);
+  }
+
+  sendMessage(userId: string, roomId: string, message: string) {
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise<void>(async (resolve, reject) => {
+      let client = this.connections.get(userId);
+
+      if (!client) {
+        client = await this.userLogin(userId);
+      }
+
       const content: IContent = {
         body: message,
         msgtype: 'm.text'
       };
 
-      this.client
+      // This client is tied directly to the server
+      client
         .sendMessage(roomId, content)
         .then(() => {
           resolve();
